@@ -27,6 +27,13 @@ export async function POST(request) {
     return NextResponse.json({ error }, { status: 401 });
   }
 
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json(
+      { error: "Missing SUPABASE_SERVICE_ROLE_KEY in server environment." },
+      { status: 500 }
+    );
+  }
+
   const body = await request.json();
   const { name, description } = body || {};
 

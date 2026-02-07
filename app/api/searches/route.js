@@ -25,7 +25,7 @@ export async function POST(request) {
       project_id: projectId,
       name: searchName,
       nl_prompt: nlPrompt || "",
-      summary: "I set these filters based on your prompt.",
+      summary: nlPrompt ? "I set these filters based on your prompt." : "",
       user_id: user.id,
     })
     .select("*")

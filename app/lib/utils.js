@@ -35,7 +35,20 @@ export function buildQueriesFromSpec(spec) {
 }
 
 export function defaultSpecFromPrompt(prompt) {
-  const text = (prompt || "").toLowerCase();
+  const trimmed = (prompt || "").trim();
+  if (!trimmed) {
+    return {
+      companies: [],
+      job_titles: [],
+      locations: [],
+      location: "",
+      keywords: [],
+      exclusions: [],
+      ranking_criteria: [],
+    };
+  }
+
+  const text = trimmed.toLowerCase();
   const location = text.includes("manchester")
     ? "Manchester"
     : text.includes("london")

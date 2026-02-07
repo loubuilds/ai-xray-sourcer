@@ -46,12 +46,21 @@ Add these in Vercel (Project → Settings → Environment Variables):
 - `SUPABASE_URL` (same as NEXT_PUBLIC_SUPABASE_URL)
 - `SUPABASE_SERVICE_ROLE_KEY` (server-side only)
 - `OPENAI_API_KEY` (server-side only, optional for later AI)
+- `BRAVE_SEARCH_API_KEY` (server-side only, used to run searches)
 
 ## Auth
 
 The homepage uses Supabase Auth and shows a login form if no session exists.
 
 For password sign-in, make sure email/password auth is enabled in Supabase.
+
+## Password reset (SMTP required)
+
+If you want “Forgot password” emails to work, configure SMTP in Supabase:
+
+Authentication → Email → SMTP Settings.
+
+Also add `/reset` to your redirect URLs in Supabase Auth URL Configuration.
 
 ## Database setup
 

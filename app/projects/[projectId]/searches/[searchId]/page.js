@@ -16,6 +16,8 @@ const emptySpec = {
 export default function SearchDetail({ params }) {
   const [spec, setSpec] = useState(emptySpec);
   const [queries, setQueries] = useState([]);
+  const [results, setResults] = useState([]);
+  const [running, setRunning] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -55,6 +57,21 @@ export default function SearchDetail({ params }) {
       setQueries(queryData.queries || []);
     } catch (err) {
       setError(err.message);
+    }
+  }
+
+  async function runSearch() {
+    setError("");
+    setRunning(true);
+    try {
+      const data = await fetchWithAuth(`/api/searches/${params.searchId}/run`, {
+        method: "POST",
+      });
+      setResults(data.results || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setRunning(false);
     }
   }
 
@@ -143,12 +160,36 @@ export default function SearchDetail({ params }) {
       </section>
 
       <section style={{ marginTop: 32 }}>
-        <Link
-          href={`/projects/${params.projectId}/searches/${params.searchId}/capture`}
-          style={primaryLinkStyle}
-        >
-          Go to Capture Workspace
-        </Link>
+        <div style={{ display: \"flex\", gap: 12, alignItems: \"center\" }}>
+          <button style={primaryButtonStyle} onClick={runSearch} disabled={running}>
+            {running ? \"Running…\" : \"Run Search\"}
+          </button>
+          <Link
+            href={`/projects/${params.projectId}/searches/${params.searchId}/capture`}
+            style={secondaryButtonStyle}
+          >
+            Go to Capture Workspace
+          </Link>
+        </div>
+      </section>
+
+      <section style={{ marginTop: 24 }}>
+        <h2>Search results</h2>
+        {results.length === 0 ? (
+          <p style={{ color: "var(--muted)" }}>No results yet.</p>
+        ) : (
+          <div style={{ display: "grid", gap: 12 }}>
+            {results.map((item) => (
+              <div key={item.url} style={panelStyle}>
+                <div style={{ fontWeight: 600 }}>{item.title}</div>
+                <a href={item.url} target="_blank" rel="noreferrer">
+                  {item.url}
+                </a>
+                <p style={{ color: "var(--muted)" }}>{item.description}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );
@@ -244,13 +285,4 @@ const secondaryButtonStyle = {
   padding: "10px 16px",
   fontWeight: 600,
   cursor: "pointer",
-};
-
-const primaryLinkStyle = {
-  display: "inline-block",
-  background: "var(--accent)",
-  color: "white",
-  padding: "10px 16px",
-  borderRadius: 10,
-  fontWeight: 600,
 };

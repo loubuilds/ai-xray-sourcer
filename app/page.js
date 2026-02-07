@@ -1,28 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { supabase } from "./supabaseClient";
-
-const SAMPLE_COMPANIES = [
-  "SG Fleet UK",
-  "Holman",
-  "Athlon",
-  "Kinto UK",
-  "Lex Autolease",
-  "Leaseplan",
-  "Arval UK",
-  "Alphabet GB",
-  "Zenith Vehicles",
-  "Ayvens",
-];
-
-const SAMPLE_TITLES = [
-  "Business Development Manager",
-  "Corporate Sales Manager",
-  "Strategic Account Manager",
-  "Field Sales Manager",
-  "Sales Director",
-];
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -79,7 +59,10 @@ export default function Home() {
     const { error: signInError } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+        emailRedirectTo:
+          typeof window !== "undefined"
+            ? `${window.location.origin}/reset`
+            : undefined,
       },
     });
 
@@ -126,7 +109,10 @@ export default function Home() {
       email,
       password,
       options: {
-        emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+        emailRedirectTo:
+          typeof window !== "undefined"
+            ? `${window.location.origin}/reset`
+            : undefined,
       },
     });
 
@@ -136,6 +122,35 @@ export default function Home() {
     }
 
     setMessage("Check your email to confirm your account.");
+  }
+
+  async function handleForgotPassword() {
+    setError("");
+    setMessage("");
+
+    if (!email) {
+      setError("Enter your email first.");
+      return;
+    }
+
+    if (!supabase) {
+      setError("Supabase is not configured.");
+      return;
+    }
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo:
+        typeof window !== "undefined"
+          ? `${window.location.origin}/reset`
+          : undefined,
+    });
+
+    if (resetError) {
+      setError(resetError.message);
+      return;
+    }
+
+    setMessage("Check your email for the password reset link.");
   }
 
   async function handleSignOut() {
@@ -240,6 +255,13 @@ export default function Home() {
             </button>
             <button
               type="button"
+              onClick={handleForgotPassword}
+              style={ghostButtonStyle}
+            >
+              Forgot password
+            </button>
+            <button
+              type="button"
               onClick={handleSignUp}
               style={ghostButtonStyle}
             >
@@ -252,152 +274,39 @@ export default function Home() {
   }
 
   return (
-    <main style={{ minHeight: "100vh", display: "flex" }}>
-      <aside
+    <main style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
+      <section
         style={{
-          width: 240,
+          width: 520,
+          maxWidth: "92vw",
+          padding: 24,
           background: "var(--panel)",
-          borderRight: "1px solid var(--border)",
-          padding: 20,
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
+          borderRadius: 12,
+          border: "1px solid var(--border)",
         }}
       >
-        <div>
-          <div style={{ fontSize: 12, color: "var(--muted)" }}>Workspace</div>
-          <div style={{ fontWeight: 600 }}>Louise’s Workspace</div>
+        <h1 style={{ marginTop: 0 }}>AI X-ray Sourcer</h1>
+        <p style={{ color: "var(--muted)" }}>
+          Signed in as <strong>{session?.user?.email}</strong>
+        </p>
+        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+          <Link href="/projects" style={primaryButtonStyle}>
+            Go to Projects
+          </Link>
+          <Link href="/profile" style={secondaryButtonStyle}>
+            Profile
+          </Link>
         </div>
-
-        <nav style={{ display: "grid", gap: 10, color: "var(--muted)" }}>
-          <strong style={{ color: "var(--text)" }}>Projects</strong>
-          <span>Searches</span>
-          <span>Shortlist</span>
-          <span>Contacts</span>
-          <span>Sequences</span>
-        </nav>
-
-        <button onClick={handleSignOut} style={ghostButtonStyle}>
+        <button
+          onClick={handleSignOut}
+          style={{ ...ghostButtonStyle, marginTop: 16 }}
+        >
           Sign out
         </button>
-      </aside>
-
-      <section style={{ flex: 1, padding: 32 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <div style={{ color: "var(--muted)" }}>First Project · Searches</div>
-            <h1 style={{ marginTop: 6 }}>Sales Managers UK Fleet</h1>
-          </div>
-          <div style={{ display: "flex", gap: 12 }}>
-            <a href="/projects" style={secondaryButtonStyle}>
-              Go to Projects
-            </a>
-            <button style={primaryButtonStyle}>Save Changes</button>
-          </div>
-        </div>
-
-        <div style={{ marginTop: 24, display: "grid", gap: 20 }}>
-          <section style={panelStyle}>
-            <h3 style={{ marginTop: 0 }}>Edit Your Search Filters</h3>
-            <div style={{ display: "grid", gap: 12 }}>
-              <FilterRow title="Companies" chips={SAMPLE_COMPANIES} />
-              <FilterRow title="Job Titles" chips={SAMPLE_TITLES} />
-              <FilterRow title="Locations" chips={["Manchester", "Leeds", "Birmingham"]} />
-            </div>
-          </section>
-
-          <section style={panelStyle}>
-            <h3 style={{ marginTop: 0 }}>I set these filters based on your request</h3>
-            <p style={{ color: "var(--muted)" }}>
-              Field sales, business development managers, corporate sales managers in the UK fleet
-              space.
-            </p>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <Chip label="Sales Growth Analyst +77" />
-              <Chip label="Manchester" />
-              <Chip label="SG Fleet UK, Holman, or 38 other companies" />
-            </div>
-          </section>
-
-          <section style={panelStyle}>
-            <h3 style={{ marginTop: 0 }}>Ranking Criteria</h3>
-            <div style={{ display: "flex", gap: 8 }}>
-              <Chip label="Leasing" />
-              <Chip label="Products" />
-            </div>
-          </section>
-
-          <section style={panelStyle}>
-            <h3 style={{ marginTop: 0 }}>Shortlist</h3>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ textAlign: "left", color: "var(--muted)" }}>
-                  <th>Name</th>
-                  <th>Status</th>
-                  <th>Role</th>
-                  <th>Company</th>
-                </tr>
-              </thead>
-              <tbody>
-                <TableRow name="Andy Higgins" role="Pan European Key Account" company="Ford" />
-                <TableRow name="Oliver Rudd" role="Area Sales Manager" company="Ogilvie Fleet" />
-                <TableRow name="Suanu Lebari" role="Sales Director" company="Chicane" />
-              </tbody>
-            </table>
-          </section>
-        </div>
       </section>
     </main>
   );
 }
-
-function FilterRow({ title, chips }) {
-  return (
-    <div>
-      <div style={{ marginBottom: 6, fontWeight: 600 }}>{title}</div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        {chips.map((chip) => (
-          <Chip key={chip} label={chip} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Chip({ label }) {
-  return (
-    <span
-      style={{
-        padding: "6px 10px",
-        borderRadius: 999,
-        background: "var(--accent-soft)",
-        color: "var(--accent)",
-        fontSize: 12,
-        fontWeight: 600,
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
-function TableRow({ name, role, company }) {
-  return (
-    <tr style={{ borderTop: "1px solid var(--border)" }}>
-      <td style={{ padding: "10px 0" }}>{name}</td>
-      <td>Not Contacted</td>
-      <td>{role}</td>
-      <td>{company}</td>
-    </tr>
-  );
-}
-
-const panelStyle = {
-  background: "var(--panel)",
-  border: "1px solid var(--border)",
-  borderRadius: 12,
-  padding: 20,
-};
 
 const primaryButtonStyle = {
   background: "var(--accent)",

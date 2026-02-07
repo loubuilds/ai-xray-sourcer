@@ -70,7 +70,13 @@ export default function ProjectsPage() {
         <button style={primaryButtonStyle} type="submit">
           Create project
         </button>
-        {error ? <p style={{ color: "#b42318" }}>{error}</p> : null}
+        {error ? (
+          <p style={{ color: "#b42318" }}>{error}</p>
+        ) : (
+          <p style={{ color: "var(--muted)", marginTop: 8 }}>
+            If this fails, check `SUPABASE_SERVICE_ROLE_KEY` in Vercel.
+          </p>
+        )}
       </form>
 
       <section style={{ marginTop: 32 }}>
