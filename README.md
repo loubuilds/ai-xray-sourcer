@@ -1,6 +1,6 @@
 # AI X-ray Sourcer
 
-Minimal Next.js (App Router) app with a safe Supabase client.
+Minimal Next.js (App Router) app with Supabase Auth, basic data model, and a starter UI that mirrors the target workflow.
 
 ## Local setup
 
@@ -43,11 +43,18 @@ Add these in Vercel (Project → Settings → Environment Variables):
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_URL` (same as NEXT_PUBLIC_SUPABASE_URL)
+- `SUPABASE_SERVICE_ROLE_KEY` (server-side only)
+- `OPENAI_API_KEY` (server-side only, optional for later AI)
 
-## Supabase test
+## Auth
 
-The homepage runs a simple query:
+The homepage uses Supabase Auth and shows a login form if no session exists.
 
-`SELECT * FROM test LIMIT 1`
+For password sign-in, make sure email/password auth is enabled in Supabase.
 
-If the table doesn’t exist or env vars are missing, the page still renders and shows the error in the UI.
+## Database setup
+
+Run the SQL in:
+
+`supabase/schema.sql`
