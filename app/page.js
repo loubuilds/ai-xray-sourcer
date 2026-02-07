@@ -6,7 +6,7 @@ export default async function Home() {
 
   if (configError) {
     result = { data: null, error: configError };
-  } else {
+  } else if (supabase) {
     try {
       const { data, error } = await supabase.from("test").select("*").limit(1);
       result = { data, error };
@@ -18,6 +18,13 @@ export default async function Home() {
         },
       };
     }
+  } else {
+    result = {
+      data: null,
+      error: {
+        message: "Supabase client not initialized.",
+      },
+    };
   }
 
   return (
