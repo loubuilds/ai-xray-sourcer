@@ -160,9 +160,9 @@ export default function SearchDetail({ params }) {
       </section>
 
       <section style={{ marginTop: 32 }}>
-        <div style={{ display: \"flex\", gap: 12, alignItems: \"center\" }}>
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <button style={primaryButtonStyle} onClick={runSearch} disabled={running}>
-            {running ? \"Running…\" : \"Run Search\"}
+            {running ? "Running…" : "Run Search"}
           </button>
           <Link
             href={`/projects/${params.projectId}/searches/${params.searchId}/capture`}
