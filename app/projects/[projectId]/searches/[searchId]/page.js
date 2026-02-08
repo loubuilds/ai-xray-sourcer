@@ -18,6 +18,9 @@ export default function SearchDetail({ params }) {
   const [queries, setQueries] = useState([]);
   const [results, setResults] = useState([]);
   const [running, setRunning] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
+  const [lastQuery, setLastQuery] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -45,29 +48,39 @@ export default function SearchDetail({ params }) {
 
   async function saveSpec() {
     setError("");
+    setStatusMessage("");
+    setSaving(true);
     try {
       await fetchWithAuth(`/api/searches/${params.searchId}/spec`, {
         method: "PATCH",
         body: JSON.stringify({ spec_json: spec }),
       });
+      const refreshed = await fetchWithAuth(`/api/searches/${params.searchId}/spec`);
+      setSpec(refreshed.spec?.spec_json || emptySpec);
       const queryData = await fetchWithAuth(`/api/searches/${params.searchId}/queries`, {
         method: "POST",
         body: JSON.stringify({ spec_json: spec }),
       });
       setQueries(queryData.queries || []);
+      setStatusMessage("Saved changes.");
     } catch (err) {
       setError(err.message);
+    } finally {
+      setSaving(false);
     }
   }
 
   async function runSearch() {
     setError("");
+    setStatusMessage("");
     setRunning(true);
     try {
       const data = await fetchWithAuth(`/api/searches/${params.searchId}/run`, {
         method: "POST",
       });
       setResults(data.results || []);
+      setLastQuery(data.query || "");
+      setStatusMessage(`Search complete (${data.results?.length || 0} results).`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -101,12 +114,13 @@ export default function SearchDetail({ params }) {
           <Link href={`/projects/${params.projectId}`}>← Back to searches</Link>
           <h1 style={{ marginTop: 16 }}>Search filters</h1>
         </div>
-        <button style={primaryButtonStyle} onClick={saveSpec}>
-          Save Changes
+        <button style={primaryButtonStyle} onClick={saveSpec} disabled={saving}>
+          {saving ? "Saving…" : "Save Changes"}
         </button>
       </div>
 
       {error ? <p style={{ color: "#b42318" }}>{error}</p> : null}
+      {statusMessage ? <p style={{ color: "#1b7f4d" }}>{statusMessage}</p> : null}
 
       <section style={{ marginTop: 24, display: "grid", gap: 20 }}>
         <FilterEditor
@@ -161,7 +175,11 @@ export default function SearchDetail({ params }) {
 
       <section style={{ marginTop: 32 }}>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <button style={primaryButtonStyle} onClick={runSearch} disabled={running}>
+          <button
+            style={primaryButtonStyle}
+            onClick={runSearch}
+            disabled={running}
+          >
             {running ? "Running…" : "Run Search"}
           </button>
           <Link
@@ -175,6 +193,11 @@ export default function SearchDetail({ params }) {
 
       <section style={{ marginTop: 24 }}>
         <h2>Search results</h2>
+        {lastQuery ? (
+          <p style={{ color: "var(--muted)" }}>
+            Query: <code>{lastQuery}</code>
+          </p>
+        ) : null}
         {results.length === 0 ? (
           <p style={{ color: "var(--muted)" }}>No results yet.</p>
         ) : (
