@@ -35,38 +35,14 @@ export function buildQueriesFromSpec(spec) {
 }
 
 export function defaultSpecFromPrompt(prompt) {
-  const trimmed = (prompt || "").trim();
-  if (!trimmed) {
-    return {
-      companies: [],
-      job_titles: [],
-      locations: [],
-      location: "",
-      keywords: [],
-      exclusions: [],
-      ranking_criteria: [],
-    };
-  }
-
-  const text = trimmed.toLowerCase();
-  const location = text.includes("manchester")
-    ? "Manchester"
-    : text.includes("london")
-    ? "London"
-    : "United Kingdom";
-
   return {
-    companies: ["SG Fleet UK", "Holman", "Lex Autolease"],
-    job_titles: [
-      "Business Development Manager",
-      "Corporate Sales Manager",
-      "Sales Director",
-    ],
-    locations: [location],
-    location,
-    keywords: ["leasing", "fleet", "contract hire"],
-    exclusions: ["internal sales", "telesales"],
-    ranking_criteria: ["Leasing", "Products"],
+    companies: [],
+    job_titles: [],
+    locations: [],
+    location: "",
+    keywords: [],
+    exclusions: [],
+    ranking_criteria: [],
   };
 }
 

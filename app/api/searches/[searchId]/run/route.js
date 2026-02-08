@@ -34,7 +34,10 @@ export async function POST(request, { params }) {
   const queryText = queries[0]?.query_text;
 
   if (!queryText) {
-    return NextResponse.json({ error: "Search spec is empty." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Add at least one title, company, or keyword before running the search." },
+      { status: 400 }
+    );
   }
 
   const url = new URL("https://api.search.brave.com/res/v1/web/search");
